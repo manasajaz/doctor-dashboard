@@ -10,17 +10,17 @@ const PatientCardSchema = new mongoose.Schema({
     type: String,
     required: false,
     trim: true, // Ensure spaces are removed
-    unique: true, // Unique phone number for each patient
+    unique: true, // Each doctor should have a unique phone number
   },
   profileImage: {
     type: String, // Path to the uploaded image
     required: false,
   },
   blood: {
-    type: String, // Store blood type for patient
-    required: false, 
+    type: String,
+    required: false,
   },
-}, { timestamps: true }); // Automatically manage `createdAt` and `updatedAt` fields
+}, { timestamps: true });
 
 const PatientCard = mongoose.model('PatientCard', PatientCardSchema);
 

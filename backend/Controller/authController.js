@@ -141,29 +141,10 @@ const login = async (req, res) => {
   }
 };
 
-
-const getDoctor = async (req, res) => {
-  try {
-    console.log("Fetching doctors from the database...");
-    const doctors = await Doctor.find({}, "-password");
-
-    if (!doctors || doctors.length === 0) {
-      console.log("No doctors found in the database.");
-      return res.status(404).json({ error: "No doctors found" });
-    }
-
-    res.status(200).json(doctors);
-  } catch (error) {
-    console.error("Error in getDoctor controller:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-
 const getDoctorCard = async (req, res) => {
   try {
     console.log("Fetching doctor cards from the database...");
-    
+
     // Fetch all doctor cards, excluding sensitive fields if any
     const doctorCards = await DoctorCard.find({}, "-__v"); // Exclude fields like `__v` if not needed
 
@@ -179,7 +160,25 @@ const getDoctorCard = async (req, res) => {
   }
 };
 
+const getPatientCard = async (req, res) => {
+  try {
+    console.log("Fetching patient cards from the database...");
 
+    // Fetch all doctor cards, excluding sensitive fields if any
+    const patientCards = await PatientCard.find({}, "-__v");    // Exclude fields like `__v` if not needed
+
+    if (!patientCards || patientCards.length === 0) {
+      console.log("No patient cards found in the database.");
+      return res.status(404).json({ error: "No patient cards found" });
+    }
+
+    res.status(200).json(patientCards);
+
+  } catch (error) {
+    console.error("Error in getpatientCard controller:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -193,7 +192,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Middleware for handling file uploads
-const uploadMiddleware = upload.single("profileImage");
+
+const uploadMiddleware = multer({ storage }).single('profileImage');
 
 
 const postDoctor = async (req, res) => {
@@ -231,33 +231,82 @@ const postDoctor = async (req, res) => {
 
 
 const postPatient = async (req, res) => {
-  try {
-    const { name, phoneNumber, blood } = req.body;
-
-    // Ensure name, phoneNumber, and blood type are provided
-    if (!name || !phoneNumber || !blood) {
-      return res.status(400).json({ error: "Name, phone number, and blood type are required" });
+  uploadMiddleware(req, res, async (err) => {
+    if (err) {
+      return res.status(500).json({ error: "Error uploading file" });
     }
 
-    const profileImage = req.file ? `/uploads/${req.file.filename}` : "";
+    try {
+      const { name, phoneNumber, blood } = req.body;
 
-    // Create new patient card
-    const newPatient = new PatientCard({
-      name,
-      phoneNumber,
-      profileImage,
-      blood: blood.trim(), // Remove extra spaces from blood type
-    });
+      if (!name || !phoneNumber || !blood) {
+        return res
+          .status(400)
+          .json({ error: "Name, phone number, and blood type are required" });
+      }
 
-    // Save the patient to the database
-    const savedPatient = await newPatient.save();
-    res.status(201).json({ ...savedPatient._doc, role: "patient" });
+      const profileImage = req.file ? `/uploads/${req.file.filename}` : "";
+
+      const newPatient = new PatientCard({
+        name,
+        phoneNumber,
+        blood,
+        profileImage,
+      });
+
+      const savedPatient = await newPatient.save();
+      res.status(201).json({
+        ...savedPatient._doc, role: "patient",
+      });
+    } catch (error) {
+      console.error("Error creating patient:", error);
+      res.status(500).json({ error: "Error creating patient" });
+    }
+  });
+};
+
+const deletePatientCard = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete the card
+    const deletedCard = await PatientCard.findByIdAndDelete(id);
+
+    if (!deletedCard) {
+      return res.status(404).json({ error: "Patient card not found" });
+    }
+
+    res.status(200).json({ message: "Patient card deleted successfully" });
   } catch (error) {
-    console.error("Error creating patient:", error);
-    res.status(500).json({ error: "Error creating patient" });
+    console.error("Error deleting patient card:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+const editPatientCard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phoneNumber, blood, profileImage } = req.body;
+
+    // Find and update the patient card by ID
+    const updatedCard = await PatientCard.findByIdAndUpdate(
+      id,
+      { name, phoneNumber, blood, profileImage },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedCard) {
+      return res.status(404).json({ error: "Patient card not found" });
+    }
+
+    res.status(200).json(updatedCard);
+  } catch (error) {
+    console.error("Error in editPatientCard controller:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 
 
-module.exports = { register, login, deleteUser, getDoctor, postDoctor , getDoctorCard, postPatient};
+module.exports = { register, login, deleteUser, postDoctor, getDoctorCard, getPatientCard, postPatient, deletePatientCard, editPatientCard };

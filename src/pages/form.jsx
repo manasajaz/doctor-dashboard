@@ -39,7 +39,7 @@ function DoctorForm() {
 
       if (response.status === 201) {
         alert("Doctor created successfully!");
-        console.log(response.data);
+        console.log("Server Response:", response.data);
       } else {
         alert("Error creating doctor");
       }

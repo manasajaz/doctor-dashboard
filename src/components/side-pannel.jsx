@@ -173,7 +173,7 @@ function Sidepannel() {
             </Link>
           </li>
           <li className="menu-item">
-            <Link to="/card" className="menu-link">
+            <Link to="/table" className="menu-link">
               <i className="menu-icon tf-icons bx bx-collection" />
               <div data-i18n="Basic">Patients</div>
             </Link>
@@ -197,12 +197,12 @@ function Sidepannel() {
           </li>
 
           {/* Tables */}
-          <li className="menu-item">
+          {/* <li className="menu-item">
             <Link to="/table" className="menu-link">
               <i className="menu-icon tf-icons bx bx-table" />
               <div data-i18n="Tables">Tables</div>
             </Link>
-          </li>
+          </li> */}
         </ul>
       </aside>
     </div>

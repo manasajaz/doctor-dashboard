@@ -24,8 +24,6 @@ app.get("/" , (req, res) => {
 // import routes
 const authRoutes = require('./Routes/authRoute');
 
-
-
 //route Use
 app.use('/api/auth', authRoutes);
 
