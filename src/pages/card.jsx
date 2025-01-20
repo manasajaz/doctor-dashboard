@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import Sidepannel from "../components/side-pannel";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import Sidepannel from "../components/side-pannel";
-import axios from "axios";
 
 function Card() {
   const [doctors, setDoctors] = useState([]);
@@ -11,7 +12,9 @@ function Card() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const response = await axios.get("http://localhost:4600/api/auth/doctor-card");
+        const response = await axios.get(
+          "http://localhost:4600/api/auth/doctor-card"
+        );
         setDoctors(response.data);
       } catch (error) {
         console.error("Error fetching doctor data:", error);
@@ -19,7 +22,7 @@ function Card() {
     };
 
     fetchDoctors();
-  }, []); // Empty dependency array to run only once
+  }, []);
 
   return (
     <div className="layout-wrapper layout-content-navbar">
@@ -29,9 +32,10 @@ function Card() {
           <Navbar />
           <div className="content-wrapper">
             <div className="container mx-auto px-4 py-8">
-              <h4 className="text-2xl font-bold mb-6 text-gray-700">Doctors List</h4>
+              <h4 className="text-2xl font-bold mb-6 text-gray-700">
+                Doctors List
+              </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Map over the list of doctors and display each one in a card */}
                 {doctors.length > 0 ? (
                   doctors.map((doctor) => (
                     <div
@@ -48,7 +52,9 @@ function Card() {
                         alt={doctor.name}
                       />
                       <div className="p-4">
-                        <h5 className="text-lg font-semibold text-gray-800">{doctor.name}</h5>
+                        <h5 className="text-lg font-semibold text-gray-800">
+                          {doctor.name}
+                        </h5>
                         <p className="text-gray-600 mt-2">
                           <strong>Phone:</strong> {doctor.phoneNumber}
                         </p>
@@ -58,17 +64,19 @@ function Card() {
                             ? doctor.diseases.join(", ")
                             : "N/A"}
                         </p>
-                        <a
-                          href={`/doctor/${doctor._id}`}
+                        <Link
+                          to={`/doctor/${doctor._id}`} // Updated Link
                           className="mt-4 block text-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                         >
                           View Profile
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-gray-500 text-lg">No doctors available</p>
+                  <p className="text-center text-gray-500 text-lg">
+                    No doctors available
+                  </p>
                 )}
               </div>
             </div>

@@ -160,6 +160,23 @@ const getDoctorCard = async (req, res) => {
   }
 };
 
+const getDoctorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const doctor = await DoctorCard.findById(id);
+    if (!doctor) {
+      return res.status(404).json({ error: "Doctor not found" });
+    }
+
+    res.status(200).json(doctor);
+  } catch (error) {
+    console.error("Error fetching doctor by ID:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 const getPatientCard = async (req, res) => {
   try {
     console.log("Fetching patient cards from the database...");
@@ -309,4 +326,4 @@ const editPatientCard = async (req, res) => {
 
 
 
-module.exports = { register, login, deleteUser, postDoctor, getDoctorCard, getPatientCard, postPatient, deletePatientCard, editPatientCard };
+module.exports = { register, login, deleteUser, postDoctor, getDoctorCard, getPatientCard, getDoctorById, postPatient, deletePatientCard, editPatientCard };
