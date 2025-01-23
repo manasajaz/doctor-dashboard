@@ -129,24 +129,30 @@ function Sidepannel() {
             {/* Toggle submenu visibility with a condition */}
             <ul className={`menu-sub ${isSubmenuOpen ? "open" : "hidden"}`}>
               <li className="menu-item">
-                <a
+                {/* <a
                   href="auth-login-basic.html"
                   className="menu-link"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <div data-i18n="Basic">Login</div>
-                </a>
+                </a> */}
+                <Link to="/login" className="menu-link">
+                  <div data-i18n="Basic">Login</div>
+                </Link>
               </li>
               <li className="menu-item">
-                <a
+                {/* <a
                   href="auth-register-basic.html"
                   className="menu-link"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <div data-i18n="Basic">Register</div>
-                </a>
+                </a> */}
+                <Link to="/register" className="menu-link">
+                  <div data-i18n="Basic">Register</div>
+                </Link>
               </li>
             </ul>
 
