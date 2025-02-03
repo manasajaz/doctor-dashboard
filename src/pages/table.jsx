@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Assuming you use Axios for fetching data
+import axios from "axios";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Sidepannel from "../components/side-pannel";
 
 function Table() {
   const [tableData, setTableData] = useState([]);
-  const [editData, setEditData] = useState(null); // State for editing
 
-  // Fetch data from the backend when the component mounts
   useEffect(() => {
-    const fetchpatient = async () => {
+    const fetchPatients = async () => {
       try {
         const response = await axios.get(
           "http://localhost:4600/api/auth/patient-card"
@@ -21,32 +21,112 @@ function Table() {
       }
     };
 
-    fetchpatient();
-  }, []); // Empty dependency array to run only once
+    fetchPatients();
+  }, []);
 
-  const deletePatient = async (id) => {
-    try {
-      await axios.delete(`http://localhost:4600/api/auth/patient-card/${id}`);
-      setTableData((prevData) => prevData.filter((row) => row._id !== id));
-    } catch (error) {
-      console.error("Error deleting patient card:", error);
+  const generatePatientReport = async (patient) => {
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Clinic Name", 105, 15, null, null, "center"); // Clinic Name
+    doc.setFontSize(12);
+    doc.text(
+      `Patient Report - ${new Date().toLocaleDateString()}`,
+      105,
+      22,
+      null,
+      null,
+      "center"
+    ); // Date
+
+    let startY = 30; // Initial Y position for content
+
+    // Add Patient Image if available
+    if (patient.profileImage) {
+      try {
+        const imageUrl = `http://localhost:4600${patient.profileImage}`;
+        const imageData = await getBase64Image(imageUrl);
+        doc.addImage(imageData, "JPEG", 80, startY, 50, 50); // Positioned at center
+        startY += 60; // Move content down
+      } catch (error) {
+        console.error("Error loading image:", error);
+      }
     }
+
+    // Patient Information Table
+    doc.autoTable({
+      startY: startY + 10,
+      head: [["Info", "Details"]],
+      body: [
+        ["Name", patient.name],
+        ["Phone Number", patient.phoneNumber],
+        ["Blood Type", patient.blood],
+      ],
+      theme: "grid",
+      headStyles: { fillColor: [22, 160, 133] }, // Custom color for headers
+      styles: { fontSize: 12, cellPadding: 5 },
+    });
+
+    // Footer
+    doc.setFontSize(10);
+    doc.text(
+      "© 2025 Clinic Name | Confidential Report",
+      105,
+      doc.internal.pageSize.height - 10,
+      null,
+      null,
+      "center"
+    );
+
+    // Save PDF
+    doc.save(`Patient_Report_${patient.name}.pdf`);
   };
 
-  const handleEditSubmit = async () => {
-    try {
-      const response = await axios.put(
-        `http://localhost:4600/api/auth/patient-card/${editData._id}`,
-        editData
-      );
-      setTableData((prevData) =>
-        prevData.map((row) => (row._id === editData._id ? response.data : row))
-      );
-      setEditData(null); // Close the edit form
-    } catch (error) {
-      console.error("Error updating patient data:", error);
-    }
+  // Convert Image URL to Base64
+  const getBase64Image = (url, maxWidth = 100, maxHeight = 100) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous"; 
+      img.src = url;
+      
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+  
+        let width = img.width;
+        let height = img.height;
+  
+        // Maintain aspect ratio
+        if (width > maxWidth || height > maxHeight) {
+          const aspectRatio = width / height;
+          if (width > height) {
+            width = maxWidth;
+            height = maxWidth / aspectRatio;
+          } else {
+            height = maxHeight;
+            width = maxHeight * aspectRatio;
+          }
+        }
+  
+        // Set high-resolution canvas
+        canvas.width = width * 2; // Double resolution for better quality
+        canvas.height = height * 2;
+        ctx.scale(2, 2); // Scale for high-quality rendering
+  
+        // Enable image smoothing for better quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(img, 0, 0, width, height);
+  
+        resolve(canvas.toDataURL("image/jpeg", 1.0)); // Keep quality at 100%
+      };
+  
+      img.onerror = reject;
+    });
   };
+  
+  
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -58,7 +138,7 @@ function Table() {
             <div className="content-wrapper">
               <div className="container mx-auto p-6">
                 <h4 className="text-2xl font-semibold py-3 mb-4">
-                  Tables / Data Table
+                  Patient Records
                 </h4>
 
                 <div className="bg-white shadow-md rounded my-6">
@@ -74,22 +154,26 @@ function Table() {
                     </thead>
                     <tbody className="text-gray-600 text-sm font-light">
                       {tableData.length > 0 ? (
-                        tableData.map((row, index) => (
+                        tableData.map((patient, index) => (
                           <tr
                             key={index}
                             className="border-b border-gray-200 hover:bg-gray-100"
                           >
                             <td className="py-3 px-6 text-left whitespace-nowrap">
-                              <span className="font-medium">{row.name}</span>
+                              <span className="font-medium">
+                                {patient.name}
+                              </span>
                             </td>
                             <td className="py-3 px-6 text-left">
-                              {row.phoneNumber}
+                              {patient.phoneNumber}
                             </td>
-                            <td className="py-3 px-6 text-left">{row.blood}</td>
+                            <td className="py-3 px-6 text-left">
+                              {patient.blood}
+                            </td>
                             <td className="py-3 px-6 text-center">
-                              {row.profileImage ? (
+                              {patient.profileImage ? (
                                 <img
-                                  src={`http://localhost:4600${row.profileImage}`}
+                                  src={`http://localhost:4600${patient.profileImage}`}
                                   alt="Profile"
                                   className="w-12 h-12 rounded-full object-cover"
                                 />
@@ -98,20 +182,12 @@ function Table() {
                               )}
                             </td>
                             <td className="py-3 px-6 text-center">
-                              <div className="flex item-center justify-center">
-                                <button
-                                  onClick={() => setEditData(row)}
-                                  className="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"
-                                >
-                                  <i className="bx bx-edit"></i>
-                                </button>
-                                <button
-                                  onClick={() => deletePatient(row._id)}
-                                  className="w-4 mr-2 transform hover:text-red-500 hover:scale-110"
-                                >
-                                  <i className="bx bx-trash"></i>
-                                </button>
-                              </div>
+                              <button
+                                onClick={() => generatePatientReport(patient)}
+                                className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                              >
+                                Generate Report
+                              </button>
                             </td>
                           </tr>
                         ))
@@ -125,69 +201,6 @@ function Table() {
                     </tbody>
                   </table>
                 </div>
-
-                {/* Edit Form */}
-                {editData && (
-                  <div className="bg-gray-100 p-4 rounded shadow-md">
-                    <h4 className="text-xl font-semibold mb-4">Edit Patient</h4>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleEditSubmit();
-                      }}
-                    >
-                      <div className="mb-4">
-                        <label className="block mb-2">Name</label>
-                        <input
-                          type="text"
-                          value={editData.name}
-                          onChange={(e) =>
-                            setEditData({ ...editData, name: e.target.value })
-                          }
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div className="mb-4">
-                        <label className="block mb-2">Phone Number</label>
-                        <input
-                          type="text"
-                          value={editData.phoneNumber}
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              phoneNumber: e.target.value,
-                            })
-                          }
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div className="mb-4">
-                        <label className="block mb-2">Blood Type</label>
-                        <input
-                          type="text"
-                          value={editData.blood}
-                          onChange={(e) =>
-                            setEditData({ ...editData, blood: e.target.value })
-                          }
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                      >
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditData(null)}
-                        className="ml-2 bg-gray-500 text-white px-4 py-2 rounded"
-                      >
-                        Cancel
-                      </button>
-                    </form>
-                  </div>
-                )}
               </div>
             </div>
           </div>
