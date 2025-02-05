@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const navigate = useNavigate();
+  
+  const [userData, setUserData] = useState({
+    email: null,
+    name: null,
+    profilePicture: null,
+    role: null,  // Added role
+  });
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    const storedName = localStorage.getItem("name") || "Guest";
+    const storedProfilePicture = localStorage.getItem("profilePicture") || "/default-avatar.png";
+    const storedRole = localStorage.getItem("role") || "User";  // Default role if not found
+    
+    setUserData({
+      email: storedEmail,
+      name: storedName,
+      profilePicture: storedProfilePicture,
+      role: storedRole,  // Set role
+    });
+  }, []);
+
 
 
   const [email, setEmail] = useState(null);
@@ -19,32 +40,19 @@ function Navbar() {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-
-  const handleClick = () => {
+  const handleLogout = () => {
     localStorage.removeItem("email");
-    navigate('/login')
+    localStorage.removeItem("name");
+    localStorage.removeItem("profilePicture");
+    localStorage.removeItem("role");  // Remove role on logout
+    localStorage.removeItem("token");
+    navigate("/login");
   };
-
 
   return (
     <div>
-      {/* Navbar */}
-      <nav
-        className="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-        id="layout-navbar"
-      >
-        <div className="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-          <a
-            className="nav-item nav-link px-0 me-xl-4"
-            href="javascript:void(0)"
-          >
-            <i className="bx bx-menu bx-sm" />
-          </a>
-        </div>
-        <div
-          className="navbar-nav-right d-flex align-items-center"
-          id="navbar-collapse"
-        >
+      <nav className="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme">
+        <div className="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
           {/* Search */}
           <div className="navbar-nav align-items-center">
             <div className="nav-item d-flex align-items-center">
@@ -57,94 +65,59 @@ function Navbar() {
               />
             </div>
           </div>
-          {/* /Search */}
+
           <ul className="navbar-nav flex-row align-items-center ms-auto">
-            {/* Place this tag where you want the button to render. */}
             <li className="nav-item lh-1 me-3">
-              <a
-                className="github-button"
-                href="javascript:;"
-                data-icon="octicon-star"
-                data-size="large"
-                data-show-count="true"
-                aria-label=""
-              >
-                {email ? (
-            <p>{email}</p>
-          ) : (
-            <p>No email found in localStorage</p>
-          )}
-              </a>
+              {userData.email ? (
+                <p className="mb-0">{userData.email}</p>
+              ) : (
+                <p className="mb-0">No email found</p>
+              )}
             </li>
-            {/* User */}
+
+            {/* User Dropdown */}
             <li className="nav-item navbar-dropdown dropdown-user dropdown">
-              <div
-                className="nav-link dropdown-toggle hide-arrow"
-                onClick={toggleDropdown}
-                style={{ cursor: "pointer" }}
-              >
+              <div className="nav-link dropdown-toggle hide-arrow" onClick={toggleDropdown} style={{ cursor: "pointer" }}>
                 <div className="avatar avatar-online">
                   <img
-                    src="../assets/img/avatars/1.png"
+                    src={userData.profilePicture}
                     alt="User Avatar"
                     className="w-px-40 h-auto rounded-circle"
                   />
                 </div>
               </div>
+
               {isDropdownOpen && (
                 <ul className="dropdown-menu dropdown-menu-end show">
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <div className="dropdown-item">
                       <div className="d-flex">
                         <div className="flex-shrink-0 me-3">
                           <div className="avatar avatar-online">
                             <img
-                              src="../assets/img/avatars/1.png"
-                              alt=""
+                              src={userData.profilePicture}
+                              alt="User Avatar"
                               className="w-px-40 h-auto rounded-circle"
                             />
                           </div>
                         </div>
                         <div className="flex-grow-1">
-                          <span className="fw-semibold d-block">John Doe</span>
-                          <small className="text-muted">Admin</small>
+                          <span className="fw-semibold d-block">{userData.name}</span>
+                          <small className="text-muted">{userData.role}</small>  {/* Display role */}
                         </div>
                       </div>
-                    </a>
+                    </div>
                   </li>
-                  <li>
-                    <div className="dropdown-divider" />
-                  </li>
+                  <li><div className="dropdown-divider" /></li>
                   <li>
                     <a className="dropdown-item" href="#">
                       <i className="bx bx-user me-2" />
                       <span className="align-middle">My Profile</span>
                     </a>
                   </li>
+                  <li><div className="dropdown-divider" /></li>
                   <li>
-                    <a className="dropdown-item" href="#">
-                      <i className="bx bx-cog me-2" />
-                      <span className="align-middle">Settings</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      <span className="d-flex align-items-center align-middle">
-                        <i className="flex-shrink-0 bx bx-credit-card me-2" />
-                        <span className="flex-grow-1 align-middle">
-                          Billing
-                        </span>
-                        <span className="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">
-                          4
-                        </span>
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <div className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <p className="dropdown-item" onClick={handleClick}>
+                    <p className="dropdown-item" onClick={handleLogout} style={{ cursor: "pointer" }}>
                       <i className="bx bx-power-off me-2" />
                       <span className="align-middle">Log Out</span>
                     </p>
@@ -152,11 +125,9 @@ function Navbar() {
                 </ul>
               )}
             </li>
-            {/*/ User */}
           </ul>
         </div>
       </nav>
-      {/* / Navbar */}
     </div>
   );
 }
