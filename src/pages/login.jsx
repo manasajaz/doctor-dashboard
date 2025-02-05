@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { Slide, toast, ToastContainer, Zoom } from "react-toastify";
+import { Slide, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import loginImg from "../assets/blog.jpg";
@@ -10,6 +10,7 @@ const Login = ({ history }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    name: "",
     showPassword: false,
   });
 
@@ -24,32 +25,42 @@ const Login = ({ history }) => {
   const EyeButtonVissibility = () => {
     setFormData({ ...formData, showPassword: !formData.showPassword });
   };
-  const handlelogin = async (e) => {
+  
+  const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
-      const response = await axios.post(
-        "http://localhost:4600/api/auth/login",
-        formData
-      );
-      localStorage.setItem("token", response.data.token);
-      navigate("/");
+      const response = await axios.post("http://localhost:4600/api/auth/login", formData);
+      console.log("Login Response:", response.data);
+  
+      // Check if name and profileImage exist in response
+      const { token, email, name, profileImage } = response.data;
+  
+      if (!token || !email) {
+        toast.error("Login failed. Please try again.");
+        return;
+      }
+  
+      // Save user details to localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("email", email);
+      localStorage.setItem("name", name || "Guest"); // Default to 'Guest' if missing
+      localStorage.setItem("profileImage", profileImage || "/default-avatar.png"); // Default avatar
+  
+      navigate("/"); // Redirect to home/dashboard
     } catch (error) {
-      if (
-        error.response.status === 400 &&
-        error.response.data.error === "Invalid credentials"
-      ) {
+      console.error("Login Error:", error);
+      if (error.response?.status === 400 && error.response?.data?.error === "Invalid credentials") {
         toast.error("Invalid email or password");
-      } else if (
-        error.response.status === 500 &&
-        error.response.data.error === "Server error"
-      ) {
-        toast.error("Server error");
+      } else if (error.response?.status === 500) {
+        toast.error("Server error, please try again later.");
       } else {
-        toast.error("An unexpected error occurred");
+        toast.error("An unexpected error occurred.");
       }
     }
   };
+  
+  
 
   return (
     <div className="grid grid-cols-10 gap-5 p-5 bg-red-50 min-h-screen">
@@ -61,7 +72,7 @@ const Login = ({ history }) => {
       </div>
       <div className=" content-around col-span-6 row-span-6 bg-white p-5 rounded- shadow min-h-screen">
         <h2 className="flex justify-start text-4xl mb-8 pb-4">Sign In</h2>
-        <form onSubmit={handlelogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Email

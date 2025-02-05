@@ -1,11 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 
 function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const navigate = useNavigate();
+
+
+  const [email, setEmail] = useState(null);
+  
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    setEmail(storedEmail);
+  }, []);
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
+
+  const handleClick = () => {
+    localStorage.removeItem("email");
+    navigate('/login')
+  };
+
+
   return (
     <div>
       {/* Navbar */}
@@ -49,7 +69,11 @@ function Navbar() {
                 data-show-count="true"
                 aria-label=""
               >
-                Star
+                {email ? (
+            <p>{email}</p>
+          ) : (
+            <p>No email found in localStorage</p>
+          )}
               </a>
             </li>
             {/* User */}
@@ -120,10 +144,10 @@ function Navbar() {
                     <div className="dropdown-divider" />
                   </li>
                   <li>
-                    <a className="dropdown-item" href="auth-login-basic.html">
+                    <p className="dropdown-item" onClick={handleClick}>
                       <i className="bx bx-power-off me-2" />
                       <span className="align-middle">Log Out</span>
-                    </a>
+                    </p>
                   </li>
                 </ul>
               )}

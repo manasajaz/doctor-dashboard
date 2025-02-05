@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login, deleteUser, postDoctor, getDoctorCard, getDoctorById, postPatient, getPatientCard, deletePatientCard, editPatientCard } = require('../Controller/authController');
+const { register, login, deleteUser, postDoctor, getDoctorCard, getDoctorById, postPatient, getPatientCard, deletePatientCard, editPatientCard, getPatientById } = require('../Controller/authController');
 const router = express.Router();
 const AuthMiddleware = require('../Middleware/AuthMiddleware');
 const upload = require('../Middleware/upload'); // Import the upload instance
@@ -19,6 +19,7 @@ router.get('/patient-card', getPatientCard)
 
 router.delete('/patient-card/:id', deletePatientCard)
 router.put('/patient-card/:id', editPatientCard)
+router.get('/patient-card/:id', getPatientById)
 
 
 module.exports = router;

@@ -99,7 +99,7 @@ const deleteUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
   const jwtSecret =
     "22c4dda7e924bfd3d0bf9fa1ce65e35fda7b8360ea018b7e215d0a881099638d";
 
@@ -133,8 +133,8 @@ const login = async (req, res) => {
     const token = jwt.sign({ id: user._id, role: userType }, jwtSecret, {
       expiresIn: "1h",
     });
-    console.log("Token generated successfully for user:", email);
-    res.json({ token });
+    console.log("Token generated successfully for user:", email, name);
+    res.json({ token, email: email, name: name });
   } catch (error) {
     console.error("Server error during login:", error);
     res.status(500).json({ error: "Server error" });
@@ -176,7 +176,6 @@ const getDoctorById = async (req, res) => {
   }
 };
 
-
 const getPatientCard = async (req, res) => {
   try {
     console.log("Fetching patient cards from the database...");
@@ -196,6 +195,22 @@ const getPatientCard = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
+const getPatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const patient = await PatientCard.findById(id);
+    if (!patient) {
+      return res.status(404).json({ error: "patient not found" });
+    }
+
+    res.status(200).json(patient);
+  } catch (error) {
+    console.error("Error fetching patient by ID:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -325,5 +340,4 @@ const editPatientCard = async (req, res) => {
 };
 
 
-
-module.exports = { register, login, deleteUser, postDoctor, getDoctorCard, getPatientCard, getDoctorById, postPatient, deletePatientCard, editPatientCard };
+module.exports = { register, login, deleteUser, postDoctor, getDoctorCard, getPatientCard, getDoctorById, getPatientById, postPatient, deletePatientCard, editPatientCard };

@@ -5,6 +5,7 @@ import Home from "../pages/home";
 import Form from "../pages/form";
 import PatientForm from "../pages/patient-form";
 import Table from "../pages/table";
+import PatientDetail from "../pages/PatientDetail"
 import DoctorDetail from "../pages/doctordetail";
 import Register from "../pages/register";
 import Login from "../pages/login";
@@ -20,6 +21,7 @@ export default function AppRouter() {
           <Route path="form" element={<Form />} />
           <Route path="patient-form" element={<PatientForm />} />
           <Route path="table" element={<Table />} />
+          <Route path="/patient-detail/:id" element={<PatientDetail />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Routes>

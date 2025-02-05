@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { jsPDF } from "jspdf";
-import "jspdf-autotable";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Sidepannel from "../components/side-pannel";
 
 function Table() {
-  const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState([]); // ✅ Define tableData
+  const navigate = useNavigate(); // ✅ Initialize navigate
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -15,7 +15,7 @@ function Table() {
         const response = await axios.get(
           "http://localhost:4600/api/auth/patient-card"
         );
-        setTableData(response.data);
+        setTableData(response.data); // ✅ Set fetched data
       } catch (error) {
         console.error("Error fetching patient data:", error);
       }
@@ -23,110 +23,6 @@ function Table() {
 
     fetchPatients();
   }, []);
-
-  const generatePatientReport = async (patient) => {
-    const doc = new jsPDF();
-
-    // Header
-    doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Clinic Name", 105, 15, null, null, "center"); // Clinic Name
-    doc.setFontSize(12);
-    doc.text(
-      `Patient Report - ${new Date().toLocaleDateString()}`,
-      105,
-      22,
-      null,
-      null,
-      "center"
-    ); // Date
-
-    let startY = 30; // Initial Y position for content
-
-    // Add Patient Image if available
-    if (patient.profileImage) {
-      try {
-        const imageUrl = `http://localhost:4600${patient.profileImage}`;
-        const imageData = await getBase64Image(imageUrl);
-        doc.addImage(imageData, "JPEG", 80, startY, 50, 50); // Positioned at center
-        startY += 60; // Move content down
-      } catch (error) {
-        console.error("Error loading image:", error);
-      }
-    }
-
-    // Patient Information Table
-    doc.autoTable({
-      startY: startY + 10,
-      head: [["Info", "Details"]],
-      body: [
-        ["Name", patient.name],
-        ["Phone Number", patient.phoneNumber],
-        ["Blood Type", patient.blood],
-      ],
-      theme: "grid",
-      headStyles: { fillColor: [22, 160, 133] }, // Custom color for headers
-      styles: { fontSize: 12, cellPadding: 5 },
-    });
-
-    // Footer
-    doc.setFontSize(10);
-    doc.text(
-      "© 2025 Clinic Name | Confidential Report",
-      105,
-      doc.internal.pageSize.height - 10,
-      null,
-      null,
-      "center"
-    );
-
-    // Save PDF
-    doc.save(`Patient_Report_${patient.name}.pdf`);
-  };
-
-  // Convert Image URL to Base64
-  const getBase64Image = (url, maxWidth = 100, maxHeight = 100) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "Anonymous"; 
-      img.src = url;
-      
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-  
-        let width = img.width;
-        let height = img.height;
-  
-        // Maintain aspect ratio
-        if (width > maxWidth || height > maxHeight) {
-          const aspectRatio = width / height;
-          if (width > height) {
-            width = maxWidth;
-            height = maxWidth / aspectRatio;
-          } else {
-            height = maxHeight;
-            width = maxHeight * aspectRatio;
-          }
-        }
-  
-        // Set high-resolution canvas
-        canvas.width = width * 2; // Double resolution for better quality
-        canvas.height = height * 2;
-        ctx.scale(2, 2); // Scale for high-quality rendering
-  
-        // Enable image smoothing for better quality
-        ctx.imageSmoothingEnabled = true;
-        ctx.drawImage(img, 0, 0, width, height);
-  
-        resolve(canvas.toDataURL("image/jpeg", 1.0)); // Keep quality at 100%
-      };
-  
-      img.onerror = reject;
-    });
-  };
-  
-  
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -182,12 +78,20 @@ function Table() {
                               )}
                             </td>
                             <td className="py-3 px-6 text-center">
-                              <button
-                                onClick={() => generatePatientReport(patient)}
+                              {/* <button
+                                onClick={() =>
+                                  navigate(`/patient-detail/${patient.id}`)
+                                }
                                 className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
                               >
-                                Generate Report
-                              </button>
+                                View Details
+                              </button> */}
+                              <Link
+                                to={`/patient-detail/${patient._id}`} // Corrected Link
+                                className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                              >
+                                View Profile
+                              </Link>
                             </td>
                           </tr>
                         ))
