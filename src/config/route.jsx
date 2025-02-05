@@ -9,6 +9,7 @@ import PatientDetail from "../pages/PatientDetail"
 import DoctorDetail from "../pages/doctordetail";
 import Register from "../pages/register";
 import Login from "../pages/login";
+import Profile from "../pages/Profile";
 
 export default function AppRouter() {
   return (
@@ -24,6 +25,7 @@ export default function AppRouter() {
           <Route path="/patient-detail/:id" element={<PatientDetail />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="profile" element={<Profile />} />
         </Routes>
       </Router>
     </>
