@@ -99,42 +99,43 @@ const deleteUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email, password, name } = req.body;
-  const jwtSecret =
-    "22c4dda7e924bfd3d0bf9fa1ce65e35fda7b8360ea018b7e215d0a881099638d";
+  const { email, password } = req.body;
+  const jwtSecret = process.env.JWT_SECRET; // Use environment variable for security
 
   try {
     console.log("Attempting to log in user with email:", email);
 
-    // Check for user in Patient collection
-    let user = await Patient.findOne({ email });
-    let userType = "patient";
-
-    // If not found, check in Doctor collection
-    if (!user) {
-      user = await Doctor.findOne({ email });
-      userType = "doctor";
-    }
-
-    // If user still not found, return error
+    // Search for user in both collections
+    let user = await Patient.findOne({ email }) || await Doctor.findOne({ email });
     if (!user) {
       console.error("User not found for email:", email);
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    // Check if password matches
+    // Determine user role based on collection
+    const userType = user instanceof Patient ? "patient" : "doctor";
+
+    // Validate password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.error("Password does not match for user:", email);
+      console.error("Invalid password for user:", email);
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ id: user._id, role: userType }, jwtSecret, {
-      expiresIn: "1h",
+    // Generate JWT
+    const token = jwt.sign({ id: user._id, role: userType }, jwtSecret, { expiresIn: "1h" });
+
+    console.log("Token generated successfully for user:", email);
+
+    // Return response with profile picture
+    res.json({
+      token,
+      email: user.email,
+      name: user.name,
+      role: userType,
+      profilePicture: user.profilePicture || null, // Send profilePicture if exists, else null
     });
-    console.log("Token generated successfully for user:", email, name);
-    res.json({ token, email: email, name: name });
+
   } catch (error) {
     console.error("Server error during login:", error);
     res.status(500).json({ error: "Server error" });
