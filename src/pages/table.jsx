@@ -6,8 +6,8 @@ import Footer from "../components/footer";
 import Sidepannel from "../components/side-pannel";
 
 function Table() {
-  const [tableData, setTableData] = useState([]); // ✅ Define tableData
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const [tableData, setTableData] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -15,7 +15,7 @@ function Table() {
         const response = await axios.get(
           "http://localhost:4600/api/auth/patient-card"
         );
-        setTableData(response.data); // ✅ Set fetched data
+        setTableData(response.data);
       } catch (error) {
         console.error("Error fetching patient data:", error);
       }
@@ -23,6 +23,26 @@ function Table() {
 
     fetchPatients();
   }, []);
+
+  // // 🗑 Delete Patient
+  // const handleDelete = async (id) => {
+  //   if (!window.confirm("Are you sure you want to delete this patient?")) return;
+
+  //   try {
+  //     await axios.delete(`http://localhost:4600/api/auth/patient-card/${id}`);
+  //     setTableData(tableData.filter((patient) => patient._id !== id)); // Remove from UI
+  //     alert("Patient deleted successfully!");
+  //   } catch (error) {
+  //     console.error("Error deleting patient:", error);
+  //     alert("Failed to delete patient.");
+  //   }
+  // };
+
+  //   // ✏️ Edit Patient
+  //   const handleEdit = (id) => {
+  //     navigate(`/patient-form/${id}`);
+  //   };
+  
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -77,21 +97,25 @@ function Table() {
                                 "No Image"
                               )}
                             </td>
-                            <td className="py-3 px-6 text-center">
-                              {/* <button
-                                onClick={() =>
-                                  navigate(`/patient-detail/${patient.id}`)
-                                }
-                                className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
-                              >
-                                View Details
-                              </button> */}
+                            <td className="py-3 px-6 text-center flex gap-2 justify-center">
                               <Link
-                                to={`/patient-detail/${patient._id}`} // Corrected Link
+                                to={`/patient-detail/${patient._id}`}
                                 className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
                               >
-                                View Profile
+                                View
                               </Link>
+                              {/* <button
+                                onClick={() => handleEdit(patient._id)}
+                                className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDelete(patient._id)}
+                                className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                              >
+                                Delete
+                              </button> */}
                             </td>
                           </tr>
                         ))
