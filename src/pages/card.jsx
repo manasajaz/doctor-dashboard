@@ -43,7 +43,7 @@ function Card() {
                       className="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"
                     >
                       <img
-                        className="w-full h-48 object-cover"
+                        className="w-full h-auto object-cover"
                         src={
                           doctor.profileImage
                             ? `http://localhost:4600${doctor.profileImage}`
