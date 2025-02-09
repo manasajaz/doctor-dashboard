@@ -81,7 +81,7 @@ function Navbar() {
                   <img
                     src={userData.profilePicture}
                     alt="User Avatar"
-                    className="w-px-40 h-auto rounded-circle"
+                    className="w-px-40 h-px-40 rounded-circle"
                   />
                 </div>
               </div>
@@ -96,7 +96,7 @@ function Navbar() {
                             <img
                               src={userData.profilePicture}
                               alt="User Avatar"
-                              className="w-px-40 h-auto rounded-circle"
+                              className="w-px-40 h-px-40 rounded-circle"
                             />
                           </div>
                         </div>
@@ -121,10 +121,7 @@ function Navbar() {
                       <span className="align-middle">My Profile</span>
                     </a>
                   </li> */}
-                  <Link
-                    to={'/profile'}
-                    className="dropdown-item"
-                  >
+                  <Link to={"/profile"} className="dropdown-item">
                     <i className="bx bx-user me-2" />
                     <span className="align-middle">My Profile</span>
                   </Link>
