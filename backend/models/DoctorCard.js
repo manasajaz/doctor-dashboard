@@ -20,6 +20,17 @@ const DoctorCardSchema = new mongoose.Schema({
     type: [String], // Array of diseases or specializations the doctor treats
     required: false, // Required as each doctor should have at least one specialization
   },
+
+  appointmentDate: {
+    type: String, 
+    required: false,
+
+  },
+  appointmentTime: {
+    type: String, 
+    required: false,
+
+  }
 }, { timestamps: true }); // Automatically manage `createdAt` and `updatedAt` fields
 
 const DoctorCard = mongoose.model('DoctorCard', DoctorCardSchema);
