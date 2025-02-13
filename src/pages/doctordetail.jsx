@@ -1,86 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import axios from "axios";
-// import Sidepannel from "../components/side-pannel";
-// import Navbar from "../components/navbar";
-// import Footer from "../components/footer";
-
-// function DoctorDetail() {
-//   const { id } = useParams(); // Extract doctor ID from the route
-//   const [doctor, setDoctor] = useState(null);
-
-//   // Fetch doctor details when the component mounts
-//   useEffect(() => {
-//     const fetchDoctor = async () => {
-//       try {
-//         const response = await axios.get(
-//           `http://localhost:4600/api/auth/doctor-card/${id}`
-//         );
-//         setDoctor(response.data);
-//       } catch (error) {
-//         console.error("Error fetching doctor details:", error);
-//       }
-//     };
-
-//     fetchDoctor();
-//   }, [id]);
-
-//   if (!doctor) {
-//     return (
-//       <p className="text-center py-8 text-gray-500">
-//         Loading doctor details...
-//       </p>
-//     );
-//   }
-
-//   return (
-//     <div className="layout-wrapper layout-content-navbar">
-//       <div className="layout-container">
-//         <Sidepannel />
-//         <div className="layout-page">
-//           <Navbar />
-//           <div className="content-wrapper">
-//             <div className="container mx-auto px-4 py-8">
-//               <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-//                 <img
-//                   className="w-full h-64 object-cover"
-//                   src={
-//                     doctor.profileImage
-//                       ? `http://localhost:4600${doctor.profileImage}`
-//                       : "/default-profile.png"
-//                   }
-//                   alt={doctor.name}
-//                 />
-//                 <div className="p-6">
-//                   <h2 className="text-2xl font-bold text-gray-800">
-//                     {doctor.name}
-//                   </h2>
-//                   <p className="text-gray-600 mt-2">
-//                     <strong>Phone:</strong> {doctor.phoneNumber}
-//                   </p>
-//                   <p className="text-gray-600 mt-2">
-//                     <strong>Specialization:</strong>{" "}
-//                     {Array.isArray(doctor.diseases)
-//                       ? doctor.diseases.join(", ")
-//                       : "N/A"}
-//                   </p>
-//                   <p className="text-gray-600 mt-2">
-//                     <strong>Description:</strong>{" "}
-//                     {doctor.description || "No description available."}
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-//             <Footer />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default DoctorDetail;
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -89,9 +6,9 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 
 function DoctorDetail() {
-  const { id } = useParams(); // Extract doctor ID from the route
+  const { id } = useParams();
   const [doctor, setDoctor] = useState(null);
-  const [showModal, setShowModal] = useState(false); // Show/hide appointment form
+  const [showModal, setShowModal] = useState(false);
   const [appointmentData, setAppointmentData] = useState({
     name: "",
     phoneNumber: "",
@@ -100,7 +17,6 @@ function DoctorDetail() {
     time: "",
   });
 
-  // Fetch doctor details when the component mounts
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
@@ -125,37 +41,39 @@ function DoctorDetail() {
     fetchDoctor();
   }, [id]);
 
-  // Handle input change for appointment form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAppointmentData({ ...appointmentData, [name]: value });
   };
 
-  // Submit Appointment Form
-const handleSubmitAppointment = async (e) => {
-  e.preventDefault();
-  try {
-    const updatedDoctorData = {
-      ...doctor,
-      appointmentDate: appointmentData.date,
-      appointmentTime: appointmentData.time,
+  const handleSubmitAppointment = async (e) => {
+    e.preventDefault();
+
+    const appointmentPayload = {
+      doctorId: id,
+      name: appointmentData.name,
+      phoneNumber: appointmentData.phoneNumber,
+      specialization: appointmentData.specialization,
+      date: appointmentData.date,
+      time: appointmentData.time,
     };
 
-    const response = await axios.patch(
-      `http://localhost:4600/api/auth/doctor-card/${id}`, // Updating the same doctor entry
-      updatedDoctorData
-    );
+    try {
+      const response = await axios.post(
+        "http://localhost:4600/api/auth/appointments",
+        appointmentPayload,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-    if (response.status === 200) {
-      alert("Appointment booked successfully!");
-      setShowModal(false); // Close the modal
+      if (response.status === 201) {
+        alert("Appointment booked successfully!");
+        setShowModal(false);
+      }
+    } catch (error) {
+      console.error("Error booking appointment:", error);
+      alert("Failed to book appointment.");
     }
-  } catch (error) {
-    console.error("Error booking appointment:", error);
-    alert("Failed to book appointment.");
-  }
-};
-
+  };
 
   if (!doctor) {
     return (
@@ -192,16 +110,13 @@ const handleSubmitAppointment = async (e) => {
                   </p>
                   <p className="text-gray-600 mt-2">
                     <strong>Specialization:</strong>{" "}
-                    {Array.isArray(doctor.diseases)
-                      ? doctor.diseases.join(", ")
-                      : "N/A"}
+                    {doctor.diseases ? doctor.diseases.join(", ") : "N/A"}
                   </p>
                   <p className="text-gray-600 mt-2">
                     <strong>Description:</strong>{" "}
                     {doctor.description || "No description available."}
                   </p>
 
-                  {/* Book Appointment Button */}
                   <button
                     onClick={() => setShowModal(true)}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -216,7 +131,6 @@ const handleSubmitAppointment = async (e) => {
             {showModal && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
                 <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
-                  {/* Close Button (Top-Left) */}
                   <button
                     onClick={() => setShowModal(false)}
                     className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-lg"
