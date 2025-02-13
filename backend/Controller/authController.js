@@ -5,6 +5,8 @@ const Patient = require("../models/Patient");
 const PatientCard = require('../models/PatientCard');
 const DoctorCard = require('../models/DoctorCard');
 const Doctor = require("../models/Doctor") // Import the correct model
+const Appointment = require("../models/Appointment");
+
 
 const multer = require("multer");
 const path = require("path");
@@ -177,6 +179,53 @@ const getDoctorById = async (req, res) => {
   }
 };
 
+
+// Book an appointment
+const bookAppointment = async (req, res) => {
+  try {
+    const { doctorId, name, phoneNumber, diseases, profileImage, date, time } = req.body;
+
+    // Validate required fields
+    if (!doctorId || !name || !phoneNumber || !date || !time) {
+      return res.status(400).json({ message: "All required fields must be provided" });
+    }
+
+    const newAppointment = new Appointment({
+      doctorId,
+      name,
+      phoneNumber,
+      diseases,
+      profileImage,
+      date,
+      time,
+    });
+
+    await newAppointment.save();
+    res.status(201).json({ message: "Appointment booked successfully", newAppointment });
+  } catch (error) {
+    console.error("Error booking appointment:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Fetch appointments by doctor
+const getAppointmentsByDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    if (!doctorId) {
+      return res.status(400).json({ message: "Doctor ID is required" });
+    }
+
+    const appointments = await Appointment.find({ doctorId });
+    res.status(200).json(appointments);
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
 const getPatientCard = async (req, res) => {
   try {
     console.log("Fetching patient cards from the database...");
@@ -341,4 +390,7 @@ const editPatientCard = async (req, res) => {
 };
 
 
-module.exports = { register, login, deleteUser, postDoctor, getDoctorCard, getPatientCard, getDoctorById, getPatientById, postPatient, deletePatientCard, editPatientCard };
+
+
+
+module.exports = { register, login, deleteUser, postDoctor, getDoctorCard, getPatientCard, getDoctorById, getPatientById, postPatient, deletePatientCard, editPatientCard, bookAppointment, getAppointmentsByDoctor };
