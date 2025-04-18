@@ -65,11 +65,11 @@ const Login = () => {
   };
 
   return (
-    <div className="grid grid-cols-10 gap-5 p-5 bg-red-50 min-h-screen">
-      <div className="col-span-4 row-span-6">
+    <div className="grid grid-cols-12 gap-5 p-5 bg-red-50 min-h-screen">
+      <div className="md:col-span-4 col-span-12 row-span-6">
         <img className="w-full object-cover h-full transition-all duration-500" src={loginImg} alt="Login" />
       </div>
-      <div className="col-span-6 row-span-6 bg-white p-5 rounded shadow min-h-screen">
+      <div className="md:col-span-8 col-span-12 row-span-6 bg-white p-5 rounded shadow min-h-screen">
         <h2 className="text-4xl mb-8 pb-4">Sign In</h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
