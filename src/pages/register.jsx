@@ -86,9 +86,9 @@ const Register = () => {
   };
 
   return (
-    <div className="grid grid-cols-10 gap-4 p-5 bg-indigo-50 min-h-screen">
+    <div className="grid grid-cols-12 gap-4 p-5 bg-indigo-50 min-h-screen">
       {/* Left-side image */}
-      <div className="col-span-4">
+      <div className="md:col-span-4 col-span-12">
         <img
           className="w-full object-cover h-full"
           src={loginImg}
@@ -97,7 +97,7 @@ const Register = () => {
       </div>
 
       {/* Right-side form */}
-      <div className="col-span-6 bg-white p-5 rounded shadow flex flex-col justify-start">
+      <div className="md:col-span-8 col-span-12 bg-white p-5 rounded shadow flex flex-col justify-start">
         <h2 className="text-4xl mb-8 mt-12 font-semibold">Create an Account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
